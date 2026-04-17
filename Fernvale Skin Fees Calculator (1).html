@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skin Cancer Quote Calculator</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f9; color: #1a1a2e; min-height: 100vh; }
+.top-bar { background: #1A5276; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+.top-bar h1 { font-size: 17px; font-weight: 600; }
+.top-bar span { font-size: 13px; opacity: .75; }
+.container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.sec { font-size: 15px; font-weight: 600; color: #1a1a2e; margin-bottom: 14px; }
+.lbl { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; display: block; }
+input[type=text], input[type=number] { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #1a1a2e; background: #fff; outline: none; font-family: inherit; }
+input:focus { border-color: #1A5276; box-shadow: 0 0 0 3px rgba(26,82,118,.12); }
+.type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.type-btn { padding: 12px 8px; font-size: 14px; font-weight: 500; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; background: #f8fafc; color: #64748b; text-align: center; font-family: inherit; transition: all .15s; }
+.type-btn.on-priv { background: #1A5276; color: #fff; border-color: #1A5276; }
+.type-btn.on-conc { background: #0F6E56; color: #fff; border-color: #0F6E56; }
+.counter-block { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; }
+.counter-ctrl { display: flex; align-items: center; justify-content: space-between; }
+.cnt-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid #cbd5e1; background: #fff; color: #1a1a2e; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; transition: all .15s; }
+.cnt-btn:hover { border-color: #1A5276; color: #1A5276; }
+.cnt-val { font-size: 36px; font-weight: 600; color: #1a1a2e; }
+
+/* Gap fee input — dollar sign fix */
+.gap-wrap { display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; overflow: hidden; transition: box-shadow .15s, border-color .15s; }
+.gap-wrap:focus-within { border-color: #1A5276; box-shadow: 0 0 0 3px rgba(26,82,118,.12); }
+.gap-dollar { padding: 0 4px 0 14px; font-size: 20px; font-weight: 600; color: #64748b; flex-shrink: 0; line-height: 1; }
+.gap-wrap input { border: none; outline: none; box-shadow: none; padding: 0 14px 0 4px; font-size: 22px; font-weight: 600; height: 54px; flex: 1; min-width: 0; color: #1a1a2e; background: transparent; }
+.gap-wrap input:focus { border: none; box-shadow: none; }
+
+/* Per-excision cards */
+.ex-list { margin-top: 14px; }
+.ex-card { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #1A5276; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.ex-card:last-child { margin-bottom: 0; }
+.ex-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; }
+.sel-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+.sel-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.sel-btn { padding: 9px 6px; font-size: 12px; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; background: #fff; color: #64748b; text-align: center; line-height: 1.4; font-family: inherit; transition: all .15s; }
+.sel-btn:hover { background: #EFF6FF; border-color: #93c5fd; color: #1d4ed8; }
+.sel-btn.on { background: #1A5276; color: #fff; border-color: #1A5276; font-weight: 600; }
+.ex-preview { font-size: 11px; color: #64748b; margin-top: 10px; padding: 6px 10px; background: #fff; border-radius: 6px; border: 1px solid #e2e8f0; line-height: 1.5; }
+
+/* Stat cards */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.stat-card { border-radius: 10px; padding: 16px 10px; text-align: center; }
+.stat-card.gross  { background: #E6F1FB; }
+.stat-card.rebate { background: #E1F5EE; }
+.stat-card.net    { background: #1A5276; color: #fff; }
+.stat-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+.stat-val { font-size: 26px; font-weight: 700; line-height: 1; }
+.stat-sub { font-size: 11px; margin-top: 5px; opacity: .65; }
+.stat-card.gross  .stat-lbl, .stat-card.gross  .stat-val { color: #0C447C; }
+.stat-card.rebate .stat-lbl, .stat-card.rebate .stat-val { color: #085041; }
+.stat-card.net .stat-lbl { color: rgba(255,255,255,.8); }
+.stat-card.net .stat-val { color: #fff; }
+.stat-card.net .stat-sub { color: rgba(255,255,255,.6); }
+
+/* Halving table */
+.halving-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+.halving-title { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+.h-header { display: grid; grid-template-columns: 2fr 0.9fr 0.65fr 0.75fr; gap: 6px; font-size: 11px; color: #94a3b8; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 4px; }
+.halving-row { display: grid; grid-template-columns: 2fr 0.9fr 0.65fr 0.75fr; gap: 6px; align-items: center; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+.halving-row:last-child { border-bottom: none; }
+.h-item { color: #1a1a2e; line-height: 1.4; }
+.h-item-code { font-size: 11px; color: #64748b; margin-top: 2px; }
+.h-full { color: #64748b; }
+.h-factor { font-weight: 700; text-align: center; font-size: 13px; }
+.f100 { color: #166534; } .f50 { color: #92400e; } .f25 { color: #991b1b; }
+.h-rebate { font-weight: 600; color: #1a1a2e; text-align: right; }
+.halving-total { display: flex; justify-content: space-between; padding-top: 10px; font-size: 13px; font-weight: 700; color: #1a1a2e; border-top: 1px solid #e2e8f0; margin-top: 6px; }
+.note-box { background: #FFFBEB; border: 1px solid #FCD34D; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #92400e; margin-bottom: 12px; line-height: 1.5; }
+.script-box { background: #1A5276; border-radius: 10px; padding: 16px 18px; color: #fff; }
+.script-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; opacity: .65; margin-bottom: 10px; }
+.script-text { font-size: 14px; line-height: 1.7; font-style: italic; }
+.script-text strong { font-weight: 700; font-style: normal; }
+.badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 600; margin-left: 8px; vertical-align: middle; }
+.badge-priv { background: #E6F1FB; color: #0C447C; }
+.badge-conc { background: #E1F5EE; color: #085041; }
+.quote-name { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+.quote-meta { font-size: 12px; color: #64748b; margin-bottom: 16px; }
+.empty { text-align: center; padding: 3rem 1rem; color: #94a3b8; font-size: 14px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; }
+@media (max-width: 480px) {
+  .stat-val { font-size: 20px; }
+  .h-header, .halving-row { grid-template-columns: 2fr 0.8fr 0.6fr 0.7fr; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>Skin Cancer Quote Calculator</h1>
+  <span>August 2025 MBS fees</span>
+</div>
+
+<div class="container">
+
+<!-- 1. GAP FEE -->
+<div class="card">
+  <p class="sec">Gap fee</p>
+  <div style="margin-bottom:14px">
+    <label class="lbl">Patient name (optional)</label>
+    <input type="text" id="pt-name" placeholder="e.g. John Smith" oninput="render()">
+  </div>
+  <label class="lbl">Gap fee quoted by Dr Balachandran ($)</label>
+  <div class="gap-wrap">
+    <span class="gap-dollar">$</span>
+    <input type="number" id="gap-input" min="0" step="1" placeholder="0" oninput="render()">
+  </div>
+</div>
+
+<!-- 2. PATIENT TYPE -->
+<div class="card">
+  <p class="sec">Patient type</p>
+  <div class="type-grid">
+    <button class="type-btn on-priv" id="btn-priv" onclick="setType('priv')">Private</button>
+    <button class="type-btn" id="btn-conc" onclick="setType('conc')">Concession / Healthcare card</button>
+  </div>
+</div>
+
+<!-- 3. BIOPSIES -->
+<div class="card">
+  <p class="sec">Biopsies</p>
+  <label class="lbl" style="margin-bottom:10px">Number of biopsies</label>
+  <div class="counter-block">
+    <div class="counter-ctrl">
+      <button class="cnt-btn" onclick="adj('bx',-1)">&#8722;</button>
+      <span class="cnt-val" id="bx-val">0</span>
+      <button class="cnt-btn" onclick="adj('bx',1)">+</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. EXCISIONS -->
+<div class="card">
+  <p class="sec">Excisions</p>
+  <label class="lbl" style="margin-bottom:10px">Number of excisions</label>
+  <div class="counter-block">
+    <div class="counter-ctrl">
+      <button class="cnt-btn" onclick="adj('ex',-1)">&#8722;</button>
+      <span class="cnt-val" id="ex-val">0</span>
+      <button class="cnt-btn" onclick="adj('ex',1)">+</button>
+    </div>
+  </div>
+  <div class="ex-list" id="ex-list"></div>
+</div>
+
+<!-- 5. QUOTE -->
+<div id="quote-area">
+  <div class="empty">Enter a gap fee and procedures above to generate a quote.</div>
+</div>
+
+</div>
+
+<script>
+const MBS_EX = {
+  tcus: {
+    a1:{ rebate:166.60, item:'31360', desc:'TCUS &ge;6mm' },
+    a2:{ rebate:166.60, item:'31364', desc:'TCUS &ge;14mm' },
+    a3:{ rebate:142.55, item:'31370', desc:'TCUS &gt;30mm' },
+  },
+  bcc: {
+    a1:{ rebate:268.60, item:'31358', desc:'BCC/SCC &ge;6mm' },
+    a2:{ rebate:242.25, item:'31363', desc:'BCC/SCC &ge;14mm' },
+    a3:{ rebate:243.85, item:'31369', desc:'BCC/SCC &gt;30mm' },
+  },
+  smel: {
+    a1:{ rebate:166.60, item:'31378', desc:'Susp. melanoma &ge;6mm' },
+    a2:{ rebate:166.60, item:'31380', desc:'Susp. melanoma &ge;14mm' },
+    a3:{ rebate:142.45, item:'31383', desc:'Susp. melanoma &gt;30mm' },
+  },
+  mel: {
+    a1:{ rebate:354.00, item:'31371', desc:'Melanoma &ge;6mm' },
+    a2:{ rebate:353.85, item:'31373', desc:'Melanoma &ge;14mm' },
+    a3:{ rebate:348.70, item:'31376', desc:'Melanoma &gt;30mm' },
+  },
+};
+const MBS_BX = { rebate:51.85, item:'30071', desc:'Biopsy &mdash; skin' };
+const AREA_LABEL = {
+  a1:'Area 1 &mdash; Nose, eyelid, lip, ear, digit',
+  a2:'Area 2 &mdash; Face, neck, scalp, limbs',
+  a3:'Area 3 &mdash; Body',
+};
+const LESION_LABEL = { tcus:'TCUS', bcc:'BCC / SCC', smel:'Suspected melanoma', mel:'Confirmed melanoma' };
+
+let patType='priv', bxCount=0, excisions=[];
+
+function setType(t){
+  patType=t;
+  ['priv','conc'].forEach(x=>document.getElementById('btn-'+x).className='type-btn'+(t===x?' on-'+x:''));
+  render();
+}
+
+function adj(type,delta){
+  if(type==='bx'){
+    bxCount=Math.max(0,bxCount+delta);
+    document.getElementById('bx-val').textContent=bxCount;
+  }
+  if(type==='ex'){
+    const newCount=Math.max(0,excisions.length+delta);
+    while(excisions.length<newCount) excisions.push({lesion:'bcc',area:'a2'});
+    while(excisions.length>newCount) excisions.pop();
+    document.getElementById('ex-val').textContent=excisions.length;
+    renderExList();
+  }
+  render();
+}
+
+function setExLesion(i,l){ excisions[i].lesion=l; renderExList(); render(); }
+function setExArea(i,a){ excisions[i].area=a; renderExList(); render(); }
+
+function renderExList(){
+  const c=document.getElementById('ex-list'); c.innerHTML='';
+  excisions.forEach((e,i)=>{
+    const m=MBS_EX[e.lesion][e.area];
+    const div=document.createElement('div');
+    div.className='ex-card';
+    div.innerHTML=`
+      <div class="ex-title">Excision ${i+1}</div>
+      <label class="lbl">Lesion type</label>
+      <div class="sel-grid2">
+        ${['tcus','bcc','smel','mel'].map(l=>`
+          <button class="sel-btn${e.lesion===l?' on':''}" onclick="setExLesion(${i},'${l}')">
+            ${LESION_LABEL[l]}
+          </button>`).join('')}
+      </div>
+      <label class="lbl">Body area</label>
+      <div class="sel-grid3">
+        <button class="sel-btn${e.area==='a1'?' on':''}" onclick="setExArea(${i},'a1')">Area 1<br><small style="opacity:.7">Nose, eyelid,<br>lip, ear, digit</small></button>
+        <button class="sel-btn${e.area==='a2'?' on':''}" onclick="setExArea(${i},'a2')">Area 2<br><small style="opacity:.7">Face, neck,<br>scalp, limbs</small></button>
+        <button class="sel-btn${e.area==='a3'?' on':''}" onclick="setExArea(${i},'a3')">Area 3<br><small style="opacity:.7">Body &mdash;<br>all other</small></button>
+      </div>
+      <div class="ex-preview">Item ${m.item} &mdash; ${m.desc} &nbsp;&middot;&nbsp; ${AREA_LABEL[e.area]} &nbsp;&middot;&nbsp; Rebate: $${m.rebate.toFixed(2)}</div>`;
+    c.appendChild(div);
+  });
+}
+
+function buildItems(){
+  const items=[];
+  excisions.forEach((e,i)=>{
+    const m=MBS_EX[e.lesion][e.area];
+    items.push({label:`Excision ${i+1}`,code:m.item,desc:m.desc,area:AREA_LABEL[e.area],rebateFull:m.rebate});
+  });
+  for(let i=0;i<bxCount;i++) items.push({label:`Biopsy ${i+1}`,code:MBS_BX.item,desc:MBS_BX.desc,area:'',rebateFull:MBS_BX.rebate});
+  items.sort((a,b)=>b.rebateFull-a.rebateFull);
+  items.forEach((item,i)=>{item.factor=i===0?1.0:i===1?0.5:0.25;item.rebate=item.rebateFull*item.factor;});
+  return items;
+}
+
+function fmt(n){return '$'+n.toFixed(2);}
+function pct(f){return f===1.0?'100%':f===0.5?'50%':'25%';}
+function fClass(f){return f===1.0?'f100':f===0.5?'f50':'f25';}
+
+function render(){
+  const gap=parseFloat(document.getElementById('gap-input').value)||0;
+  const name=document.getElementById('pt-name').value.trim();
+  const today=new Date().toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'});
+  if((excisions.length===0&&bxCount===0)||gap===0){
+    document.getElementById('quote-area').innerHTML='<div class="empty">Enter a gap fee and procedures above to generate a quote.</div>';
+    return;
+  }
+  const items=buildItems();
+  const totalRebate=items.reduce((s,x)=>s+x.rebate,0);
+  const gross=gap+totalRebate;
+  const isConc=patType==='conc';
+  const halvRows=items.map(x=>`
+    <div class="halving-row">
+      <div class="h-item">${x.label}<div class="h-item-code">Item ${x.code} &mdash; ${x.desc}${x.area?' &nbsp;&middot;&nbsp; '+x.area:''}</div></div>
+      <div class="h-full">${fmt(x.rebateFull)}</div>
+      <div class="h-factor ${fClass(x.factor)}">&times;${pct(x.factor)}</div>
+      <div class="h-rebate">${fmt(x.rebate)}</div>
+    </div>`).join('');
+  document.getElementById('quote-area').innerHTML=`
+    <div class="quote-name">${name||'Patient quote'}<span class="badge ${isConc?'badge-conc':'badge-priv'}">${isConc?'Concession':'Private'}</span></div>
+    <div class="quote-meta">${today}</div>
+    <div class="stat-grid">
+      <div class="stat-card gross"><div class="stat-lbl">Gross billed</div><div class="stat-val">${fmt(gross)}</div><div class="stat-sub">Gap + Medicare</div></div>
+      <div class="stat-card rebate"><div class="stat-lbl">Medicare rebate</div><div class="stat-val">${fmt(totalRebate)}</div><div class="stat-sub">Patient claims back</div></div>
+      <div class="stat-card net"><div class="stat-lbl">Patient pays</div><div class="stat-val">${fmt(gap)}</div><div class="stat-sub">Net out-of-pocket</div></div>
+    </div>
+    <div class="halving-box">
+      <div class="halving-title">${items.length>1?'Medicare rebate breakdown &mdash; multiple operation rule':'Medicare rebate'}</div>
+      <div class="h-header"><span>Item</span><span>Full rebate</span><span style="text-align:center">Factor</span><span style="text-align:right">Payable</span></div>
+      ${halvRows}
+      <div class="halving-total"><span>Total Medicare rebate</span><span>${fmt(totalRebate)}</span></div>
+    </div>
+    <div class="note-box">&#9432;&nbsp; Gap fee is payable on the day results are returned &mdash; not on the day of the procedure.</div>
+    <div class="script-box">
+      <div class="script-title">Reception script</div>
+      <div class="script-text">"The total amount billed will be <strong>${fmt(gross)}</strong>. Medicare will pay <strong>${fmt(totalRebate)}</strong> of that directly back to you, so your out-of-pocket cost is <strong>${fmt(gap)}</strong>. This fee is payable when your results come back."</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
